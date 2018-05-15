@@ -1,0 +1,79 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+		
+		
+	function getNewDate(today){
+		var dd = today.getDate();
+		var mm = today.getMonth()+1; //January is 0!
+		var yyyy = today.getFullYear();
+
+		if(dd<10) {
+			dd = '0'+dd
+		} 
+		if(mm<10) {
+			mm = '0'+mm
+		} 
+		today = mm + '/' + dd + '/' + yyyy;
+		return today;
+	}	
+		
+	var dateArray =[];
+	var lists = [];	
+	function createDateArray(){
+		
+		for (let i = 0; i < 7; i++){
+			var thisDay = new Date();
+			var previousDay = new Date(thisDay);
+			previousDay.setDate(previousDay.getDate() - i);
+			dateArray[i] =getNewDate(previousDay);
+		
+		}
+	}  
+	
+	var capacityData = [3541.63,11211.51,10993.58,11911.52,12293.52,13451.52,15444.55];
+
+	
+	function createListArray(xArray,yArray){
+		for(var i =6; i >= 0; i--){
+			lists.push([xArray[i],yArray[i]]);
+		}
+	}	
+	createDateArray();
+	createListArray(dateArray,capacityData);
+	
+	
+	  
+	  google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+	  
+	  var data = new google.visualization.DataTable();
+	  data.addColumn('string', 'Year');
+	  data.addColumn('number', 'Volume');
+	  console.log(lists[0]);
+	  for(var k = 0; k < lists.length ; k++){
+		data.addRows([lists[k]]);
+	  }
+	  
+        var options = {
+          title: 'Capacity',
+		  animation: {startup: 'true', duration : 1000, easing : 'inAndOut'},
+          hAxis: {titleTextStyle: {color: '#333'}},
+          vAxis: {title: 'Volume (bbl)', minValue: 0},
+		  legend: {position: 'none'}
+        };
+
+        var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+	  
+	
+    </script>
+  </head>
+  <body>
+    <div id="chart_div" style="width: 100%; height: 500px;"></div>
+  </body>
+</html>
