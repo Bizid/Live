@@ -1,0 +1,476 @@
+
+<!DOCTYPE html>
+<html lang="en" ng-app="kitchensink">
+ 
+  
+
+    <title>LiveLayout</title>
+   <link rel="stylesheet" href="./css/master.css">
+    <link rel="stylesheet" href="./css/prism.css">
+    <style>
+      pre { margin-left: 15px !important }
+    </style>
+
+    <!--[if lt IE 9]>
+      <script src="../lib/excanvas.js"></script>
+    <![endif]-->
+
+    <script src="./js/prism.js"></script>
+   <script src="./js/fabric.js"></script>
+    <script src="./js/master.js"></script>
+
+	
+	<script src="./js/jquery.js"></script>
+	<script src="./js/bootstrap.js"></script>
+	<script src="./js/paster.js"></script>
+	<link rel="stylesheet" href="./css/bootstrap.css">
+	<link rel="stylesheet" href="./css/kitchensink.css">
+<script src="./js/utils.js"></script>
+
+<script src="./js/angular.min.js"></script>
+    <script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+    <script type="text/javascript" src="./js/gauge.js"></script>
+
+    <script  type="text/javascript">
+            
+        
+      var gauges = [];
+      
+      function createGauge(name, label, min, max)
+      {
+        var config = 
+        {
+          size: 120,
+          label: label,
+          min: undefined != min ? min : 0,
+          max: undefined != max ? max : 100,
+          minorTicks: 5
+        }
+        
+        var range = config.max - config.min;
+        config.yellowZones = [{ from: config.min + range*0.75, to: config.min + range*0.9 }];
+        config.redZones = [{ from: config.min + range*0.9, to: config.max }];
+        
+        gauges[name] = new Gauge(name + "GaugeContainer", config);
+        gauges[name].render();
+      }
+      
+      function createGauges()
+      {
+        //createGauge("memory", "Memory");
+        createGauge("cpu", "CPU");
+        createGauge("network", "Network");
+        //createGauge("test", "Test", -50, 50 );
+      }
+      
+      function updateGauges()
+      {
+        for (var key in gauges)
+        {
+          console.log("Key");
+          console.log(key);
+          //var value = getRandomValue(gauges[key])
+          var value = 20;
+          gauges[key].redraw(value);
+        }
+      }
+      
+      function getRandomValue(gauge)
+      {
+        var overflow = 0; //10;
+        return gauge.config.min - overflow + (gauge.config.max - gauge.config.min + overflow*2) *  Math.random();
+      }
+      
+      function initialize()
+      {
+        createGauges();
+        setInterval(updateGauges, 5000);
+      }
+      
+    </script>
+  <body onload="initialize()">
+    
+
+
+
+    <div id="bd-wrapper" ng-controller="CanvasControls">
+      <h2><span>Live</span></h2>
+<div >
+    <span id="memoryGaugeContainer" ng-bind-html="myText"></span>
+    <span id="networkGaugeContainer"></span>
+    <span id="cpuGaugeContainer"></span>
+</div>
+<div style="position:relative;width:704px;float:left;" id="canvas-wrapper">
+
+  <div id="canvas-controls">
+    
+<div id="complexity">
+      <!-- Canvas complexity (number of paths):
+      <strong>{[ canvas.complexity() ]}</strong> -->
+    </div>
+    <div id="canvas-background">
+      <label for="canvas-background-picker">Canvas background:</label>
+      <input type="color" bind-value-to="canvasBgColor">
+    </div>
+  </div>
+
+  <canvas id="canvas" width="700" height="600"></canvas>
+
+  <div id="color-opacity-controls" ng-show="canvas.getActiveObject()">
+
+    <label for="opacity">Opacity: </label>
+    <input value="100" type="range" bind-value-to="opacity">
+
+    <label for="color" style="margin-left:10px">Color: </label>
+    <input type="color" style="width:40px" bind-value-to="fill">
+  </div>
+
+  <div id="text-wrapper" style="margin-top: 10px" ng-show="getText()">
+
+    <textarea bind-value-to="text"></textarea>
+
+    <div id="text-controls">
+      <label for="font-family" style="display:inline-block">Font family:</label>
+      <select id="font-family" class="btn-object-action" bind-value-to="fontFamily">
+        <option value="arial">Arial</option>
+        <option value="helvetica" selected>Helvetica</option>
+        <option value="myriad pro">Myriad Pro</option>
+        <option value="delicious">Delicious</option>
+        <option value="verdana">Verdana</option>
+        <option value="georgia">Georgia</option>
+        <option value="courier">Courier</option>
+        <option value="comic sans ms">Comic Sans MS</option>
+        <option value="impact">Impact</option>
+        <option value="monaco">Monaco</option>
+        <option value="optima">Optima</option>
+        <option value="hoefler text">Hoefler Text</option>
+        <option value="plaster">Plaster</option>
+        <option value="engagement">Engagement</option>
+      </select>
+      <br>
+      <label for="text-align" style="display:inline-block">Text align:</label>
+      <select id="text-align" class="btn-object-action" bind-value-to="textAlign">
+        <option>Left</option>
+        <option>Center</option>
+        <option>Right</option>
+        <option>Justify</option>
+      </select>
+      <div>
+        <label for="text-bg-color">Background color:</label>
+        <input type="color" value="" id="text-bg-color" size="10" class="btn-object-action"
+          bind-value-to="bgColor">
+      </div>
+      <div>
+        <label for="text-lines-bg-color">Background text color:</label>
+        <input type="color" value="" id="text-lines-bg-color" size="10" class="btn-object-action"
+          bind-value-to="textBgColor">
+      </div>
+      <div>
+        <label for="text-stroke-color">Stroke color:</label>
+        <input type="color" value="" id="text-stroke-color" class="btn-object-action"
+          bind-value-to="strokeColor">
+      </div>
+      <div>
+        <label for="text-stroke-width">Stroke width:</label>
+        <input type="range" value="1" min="1" max="5" id="text-stroke-width" class="btn-object-action"
+          bind-value-to="strokeWidth">
+      </div>
+      <div>
+        <label for="text-font-size">Font size:</label>
+        <input type="range" value="" min="1" max="120" step="1" id="text-font-size" class="btn-object-action"
+          bind-value-to="fontSize">
+      </div>
+      <div>
+        <label for="text-line-height">Line height:</label>
+        <input type="range" value="" min="0" max="10" step="0.1" id="text-line-height" class="btn-object-action"
+          bind-value-to="lineHeight">
+      </div>
+    </div>
+    <div id="text-controls-additional">
+      <button type="button" class="btn btn-object-action"
+        ng-click="toggleBold()"
+        ng-class="{'btn-inverse': isBold()}">
+        Bold
+      </button>
+      <button type="button" class="btn btn-object-action" id="text-cmd-italic"
+        ng-click="toggleItalic()"
+        ng-class="{'btn-inverse': isItalic()}">
+        Italic
+      </button>
+      <button type="button" class="btn btn-object-action" id="text-cmd-underline"
+        ng-click="toggleUnderline()"
+        ng-class="{'btn-inverse': isUnderline()}">
+        Underline
+      </button>
+      <button type="button" class="btn btn-object-action" id="text-cmd-linethrough"
+        ng-click="toggleLinethrough()"
+        ng-class="{'btn-inverse': isLinethrough()}">
+        Linethrough
+      </button>
+      <button type="button" class="btn btn-object-action" id="text-cmd-overline"
+        ng-click="toggleOverline()"
+        ng-class="{'btn-inverse': isOverline()}">
+        Overline
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="commands" ng-click="maybeLoadShape($event)">
+
+  <ul class="nav nav-tabs">
+    <li  class="active"><a href="#simple-shapes" data-toggle="tab">Simple</a></li>
+    <li><a href="#object-controls-pane" data-toggle="tab">Controls</a></li>
+    <li><a href="#load-svg-pane" data-toggle="tab">Load SVG</a></li>
+    <li><a href="#execute-code" data-toggle="tab">Execute</a></li>
+    <li><a href="#json-inout" data-toggle="tab">JSON</a></li>
+  </ul>
+
+  <div class="tab-content">
+
+   
+
+    <div class="tab-pane active" id="simple-shapes">
+      <p>Add <strong></strong> to canvas:</p>
+      <ul class="svg-shapes">
+        <li><button type="button" class="btn tank" ng-click="addLanes()">Lanes</button></li>
+<li><button type="button" class="btn tank" ng-click="addTanks()">Tanks</button></li>
+<li><button type="button" class="btn tank" ng-click="addWaterWells()">Water Wells</button></li>
+<li><button type="button" class="btn tank" ng-click="addPumps()">Pumps</button></li>
+<li><button type="button" class="btn tank" ng-click="addChargePumps()">Charge Pumps</button></li>
+<li><button type="button" class="btn tank" ng-click="addTrashPumps()">Trash Pumps</button></li>
+<li><button type="button" class="btn tank" ng-click="addBoosterPumps()">Booster Pumps</button></li>
+<li><button type="button" class="btn tank" ng-click="addFilterSystems()">Filter Systems</button></li>
+<li><button type="button" class="btn tank" ng-click="addPipelines()">Pipelines</button></li>
+<li><button type="button" class="btn tank" ng-click="addFlowMeters()">FlowMeters</button></li>
+<li><button type="button" class="btn tank" ng-click="addFlowMeterGroups()">FlowMeter Groups</button></li>
+<li><button type="button" class="btn tank" ng-click="addActuators()">Actuators</button></li>
+<li><button type="button" class="btn tank" ng-click="addSensors()">Sensors</button></li>
+<li><button type="button" class="btn tank" ng-click="addTotalIntakeMeter()">Total Intake Meter</button></li>
+<li><button type="button" class="btn tank" ng-click="addControlBoxes()">Control Boxes</button></li>
+<li><button type="button" class="btn tank" ng-click="addPowerSupplies()">Power Supplies</button></li>
+<li><button type="button" class="btn tank" ng-click="addPressureSensors()">Pressure Sensors</button></li>
+<li><button type="button" class="btn tank" ng-click="addWellInjection()">Well Injection Sites</button></li>
+<li><button type="button" class="btn tank" ng-click="addItemsGroup()">Add Items Group</button></li>
+<li><button type="button" class="btn tank" ng-click="addGauge('memory','Memory',0,300)">Add Gauge</button></li>	  
+	  
+      </ul>
+
+    </div>
+
+    <div class="tab-pane " id="object-controls-pane">
+      <div id="global-controls">
+        <p>
+          Rasterize canvas to
+          <button class="btn btn-success" id="rasterize" ng-click="rasterize()">
+            Image
+          </button>
+          <button class="btn btn-success" id="rasterize-svg" ng-click="rasterizeSVG()">
+            SVG
+          </button>
+          <button class="btn btn-success" id="rasterize-json" ng-click="rasterizeJSON()">
+            JSON
+          </button>
+        </p>
+        <p>
+          <button class="btn btn-danger clear" ng-click="confirmClear()">Clear canvas</button>
+        </p>
+      </div>
+
+      <div class="object-controls" object-buttons-enabled="getSelected()">
+
+        <div style="margin-top:10px;">
+          <p>
+            <button class="btn btn-object-action" id="remove-selected"
+              ng-click="removeSelected()">
+              Remove selected object/group
+            </button>
+          </p>
+
+          <button class="btn btn-lock btn-object-action"
+            ng-click="setHorizontalLock(!getHorizontalLock())"
+            ng-class="{'btn-inverse': getHorizontalLock()}">
+            {[ getHorizontalLock() ? 'Unlock horizontal movement' : 'Lock horizontal movement' ]}
+          </button>
+          <br>
+          <button class="btn btn-lock btn-object-action"
+            ng-click="setVerticalLock(!getVerticalLock())"
+            ng-class="{'btn-inverse': getVerticalLock()}">
+            {[ getVerticalLock() ? 'Unlock vertical movement' : 'Lock vertical movement' ]}
+          </button>
+          <br>
+          <button class="btn btn-lock btn-object-action"
+            ng-click="setScaleLockX(!getScaleLockX())"
+            ng-class="{'btn-inverse': getScaleLockX()}">
+            {[ getScaleLockX() ? 'Unlock horizontal scaling' : 'Lock horizontal scaling' ]}
+          </button>
+          <br>
+          <button class="btn btn-lock btn-object-action"
+            ng-click="setScaleLockY(!getScaleLockY())"
+            ng-class="{'btn-inverse': getScaleLockY()}">
+            {[ getScaleLockY() ? 'Unlock vertical scaling' : 'Lock vertical scaling' ]}
+          </button>
+          <br>
+          <button class="btn btn-lock btn-object-action"
+            ng-click="setRotationLock(!getRotationLock())"
+            ng-class="{'btn-inverse': getRotationLock()}">
+            {[ getRotationLock() ? 'Unlock rotation' : 'Lock rotation' ]}
+          </button>
+        </div>
+
+        <div style="margin-top:10px">
+          <p>
+            <span style="margin-right: 10px">Origin X: </span>
+            <label>
+              Left
+              <input type="radio" name="origin-x" class="origin-x btn-object-action" value="left"
+                bind-value-to="originX">
+            </label>
+            <label>
+              Center
+              <input type="radio" name="origin-x" class="origin-x btn-object-action" value="center"
+                bind-value-to="originX">
+            </label>
+            <label>
+              Right
+              <input type="radio" name="origin-x" class="origin-x btn-object-action" value="right"
+                bind-value-to="originX">
+            </label>
+          </p>
+          <p>
+            <span style="margin-right: 10px">Origin Y: </span>
+            <label>
+              Top
+              <input type="radio" name="origin-y" class="origin-y btn-object-action" value="top"
+                bind-value-to="originY">
+            </label>
+            <label>
+              Center
+              <input type="radio" name="origin-y" class="origin-y btn-object-action" value="center"
+                bind-value-to="originY">
+            </label>
+            <label>
+              Bottom
+              <input type="radio" name="origin-y" class="origin-y btn-object-action" value="bottom"
+                bind-value-to="originY">
+            </label>
+          </p>
+        </div>
+
+        <div style="margin-top:10px;">
+          <button id="send-backwards" class="btn btn-object-action"
+            ng-click="sendBackwards()">Send backwards</button>
+          <button id="send-to-back" class="btn btn-object-action"
+            ng-click="sendToBack()">Send to back</button>
+        </div>
+
+        <div style="margin-top:4px;">
+          <button id="bring-forward" class="btn btn-object-action"
+            ng-click="bringForward()">Bring forwards</button>
+          <button id="bring-to-front" class="btn btn-object-action"
+            ng-click="bringToFront()">Bring to front</button>
+        </div>
+
+        <div style="margin-top:10px;">
+          <button id="gradientify" class="btn btn-object-action" ng-click="gradientify()">
+            Gradientify
+          </button>
+          <button id="shadowify" class="btn btn-object-action" ng-click="shadowify()">
+            Shadowify
+          </button>
+          <button id="patternify" class="btn btn-object-action" ng-click="patternify()">
+            Patternify
+          </button>
+          <button id="clip" class="btn btn-object-action" ng-click="clip()">
+            Clip
+          </button>
+        </div>
+      </div>
+      <div style="margin-top:10px;" id="drawing-mode-wrapper">
+
+        <button id="drawing-mode" class="btn btn-info"
+          ng-click="setFreeDrawingMode(!getFreeDrawingMode())"
+          ng-class="{'btn-inverse': getFreeDrawingMode()}">
+          {[ getFreeDrawingMode() ? 'Exit free drawing mode' : 'Enter free drawing mode' ]}
+        </button>
+
+        <div id="drawing-mode-options" ng-show="getFreeDrawingMode()">
+          <label for="drawing-mode-selector">Mode:</label>
+          <select id="drawing-mode-selector" bind-value-to="drawingMode">
+            <option>Pencil</option>
+            <option>Circle</option>
+            <option>Spray</option>
+            <option>Pattern</option>
+
+            <option>hline</option>
+            <option>vline</option>
+            <option>square</option>
+            <option>diamond</option>
+            <option>texture</option>
+          </select>
+          <br>
+          <label for="drawing-line-width">Line width:</label>
+          <input type="range" value="30" min="0" max="150" bind-value-to="drawingLineWidth">
+          <br>
+          <label for="drawing-color">Line color:</label>
+          <input type="color" value="#005E7A" bind-value-to="drawingLineColor">
+          <br>
+          <label for="drawing-shadow-width">Line shadow width:</label>
+          <input type="range" value="0" min="0" max="50" bind-value-to="drawingLineShadowWidth">
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-pane" id="load-svg-pane">
+      <textarea id="svg-console" bind-value-to="consoleSVG">
+      </textarea>
+      <button type="button" class="btn btn-info" ng-click="loadSVG()">
+        Load
+      </button>
+      <button type="button" class="btn" ng-click="loadSVGWithoutGrouping()">
+        Load without grouping
+      </button>
+    </div>
+
+      <div class="tab-pane" id="execute-code">
+        <textarea id="canvas-console" bind-value-to="console">
+        </textarea>
+        <button type="button" class="btn btn-info" ng-click="execute()">Execute</button>
+      </div>
+      <div class="tab-pane" id="json-inout">
+      <textarea id="json-console" bind-value-to="consoleJSON">      </textarea>
+      <button type="button" class="btn btn-info" ng-click="loadJSON()">
+        Load
+      </button>
+      <button type="button" class="btn btn-info" ng-click="saveJSON()">
+        Save
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- <script src="../http://fabricjs.com/lib/centering_guidelines.js"></script>
+<script src="../http://fabricjs.com/lib/aligning_guidelines.js"></script> -->
+
+<script src="./js/font_definitions.js"></script>
+<script>
+  var kitchensink = { };
+  var canvas = new fabric.Canvas('canvas');
+</script>
+
+
+<script src="./js/app_config.js"></script>
+<script src="./js/controller.js"></script>
+
+<script src="./js/main.js"></script>
+
+
+
+    </div>
+
+    <script>
+     
+
+  </body>
+</html>
