@@ -19,12 +19,12 @@
    <script src="./js/fabric.js"></script>
     <script src="./js/master.js"></script>
 
-	
-	<script src="./js/jquery.js"></script>
-	<script src="./js/bootstrap.js"></script>
-	<script src="./js/paster.js"></script>
-	<link rel="stylesheet" href="./css/bootstrap.css">
-	<link rel="stylesheet" href="./css/kitchensink.css">
+  
+  <script src="./js/jquery.js"></script>
+  <script src="./js/bootstrap.js"></script>
+  <script src="./js/paster.js"></script>
+  <link rel="stylesheet" href="./css/bootstrap.css">
+  <link rel="stylesheet" href="./css/kitchensink.css">
 <script src="./js/utils.js"></script>
 
 <script src="./js/angular.min.js"></script>
@@ -55,24 +55,37 @@
         gauges[name].render();
       }
       
-      function createGauges()
+      /*function createGauges()
       {
         //createGauge("memory", "Memory");
         createGauge("cpu", "CPU");
         createGauge("network", "Network");
         //createGauge("test", "Test", -50, 50 );
-      }
+      }*/
       
       function updateGauges()
       {
         for (var key in gauges)
         {
-          console.log("Key");
-          console.log(key);
-          //var value = getRandomValue(gauges[key])
-          var value = 20;
-          gauges[key].redraw(value);
+         // console.log("Key");
+          //console.log(key);
+          var value = getRandomValue(gauges[key])
+          //var value = 20;
+         // console.log(value);
+          gauges[key].redraw(value, 0);
+          var elem = document.getElementById("gaugesValue").children;
+
+          for (var a = 0; a < elem.length;a++)
+          {
+            if(elem[a].dataset.name == key){
+              elem[a].value = value;
+              setInterval(document.getElementById("upGaugeBtn").click(), 1000);
+            }
+
+          }
+            
         }
+        
       }
       
       function getRandomValue(gauge)
@@ -83,8 +96,8 @@
       
       function initialize()
       {
-        createGauges();
-        setInterval(updateGauges, 5000);
+        //createGauges();
+        setInterval(updateGauges, 7000);
       }
       
     </script>
@@ -95,11 +108,10 @@
 
     <div id="bd-wrapper" ng-controller="CanvasControls">
       <h2><span>Live</span></h2>
-<div >
+<div id="createGauge">
     <span id="memoryGaugeContainer" ng-bind-html="myText"></span>
-    <span id="networkGaugeContainer"></span>
-    <span id="cpuGaugeContainer"></span>
 </div>
+<div id="gaugesValue"></div>
 <div style="position:relative;width:704px;float:left;" id="canvas-wrapper">
 
   <div id="canvas-controls">
@@ -233,6 +245,9 @@
     <div class="tab-pane active" id="simple-shapes">
       <p>Add <strong></strong> to canvas:</p>
       <ul class="svg-shapes">
+        <li><button type="button" class="btn tank" ng-click="addHLine()">Horizontal Line</button></li>
+        <li><button type="button" class="btn tank" ng-click="addVLine()">Vertical Line</button></li>
+        <li><button type="button" class="btn tank" ng-click="addConnector()">Add line connector</button></li>
         <li><button type="button" class="btn tank" ng-click="addLanes()">Lanes</button></li>
 <li><button type="button" class="btn tank" ng-click="addTanks()">Tanks</button></li>
 <li><button type="button" class="btn tank" ng-click="addWaterWells()">Water Wells</button></li>
@@ -252,9 +267,28 @@
 <li><button type="button" class="btn tank" ng-click="addPressureSensors()">Pressure Sensors</button></li>
 <li><button type="button" class="btn tank" ng-click="addWellInjection()">Well Injection Sites</button></li>
 <li><button type="button" class="btn tank" ng-click="addItemsGroup()">Add Items Group</button></li>
-<li><button type="button" class="btn tank" ng-click="addGauge('memory','Memory',0,300)">Add Gauge</button></li>	  
-	  
+<li>
+  <input type="text" id="gaugename">
+  <input type="text" id="gaugelabel">
+  <input type="text" id="gaugemin">
+
+  <input type="text" id="gaugemax">
+<script type="text/javascript">
+  
+
+  function setupGauge(){
+    
+    return addGauge(name,label,min,max);
+  }
+
+</script>
+  <button type="button" class="btn tank" ng-click="addGauge()">Add Gauge</button></li>    
+    <li style="display: none;"><button id="upGaugeBtn" type="button" class="btn tank" ng-click="updateGaugeVal()">Update Gauge</button></li>
+    <li><button type="button" class="btn tank" ng-click="addLaneGauge()">Drawwwww</button></li>
+         <li><button type="button" class="btn tank" ng-click="animateLaneGauge()">Animate</button></li>
       </ul>
+
+
 
     </div>
 
@@ -457,6 +491,8 @@
 <script>
   var kitchensink = { };
   var canvas = new fabric.Canvas('canvas');
+
+
 </script>
 
 
@@ -464,7 +500,11 @@
 <script src="./js/controller.js"></script>
 
 <script src="./js/main.js"></script>
-
+<script>
+  console.log("Canvas Start");
+  console.log(canvas);
+  console.log("Canvas End");
+</script>
 
 
     </div>

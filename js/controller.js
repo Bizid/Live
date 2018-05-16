@@ -216,6 +216,228 @@ function addAccessors($scope) {
 
 
 
+
+$scope.addVLine = function() {
+  console.log("add Vertical line");
+    
+var Line = (function() {
+  function Line(canvas) {
+    this.canvas = canvas;
+    this.isDrawing = false;
+    this.bindEvents();
+  }
+
+  Line.prototype.bindEvents = function() {
+    var inst = this;
+    inst.canvas.on('mouse:down', function(o) {
+        inst.onMouseDown(o);
+    });
+    inst.canvas.on('mouse:move', function(o) { 
+        inst.onMouseMove(o);
+    });
+    inst.canvas.on('mouse:up', function(o) {
+        inst.onMouseUp(o);
+    });
+    inst.canvas.on('object:moving', function(o) {
+        inst.disable();
+    })
+  }
+
+  Line.prototype.onMouseUp = function(o) {
+    var inst = this;
+    if (inst.isEnable()) {
+      inst.disable();
+    }
+  };
+
+  Line.prototype.onMouseMove = function(o) {
+    var inst = this;
+    if (!inst.isEnable()) {
+      return;
+    }
+
+    var pointer = inst.canvas.getPointer(o.e);
+    var activeObj = inst.canvas.getActiveObject();
+
+    activeObj.set({
+      x2: pointer.x,
+      y2: pointer.y
+    });
+    activeObj.setCoords();
+    inst.canvas.renderAll();
+  };
+
+  Line.prototype.onMouseDown = function(o) {
+    var inst = this;
+    inst.enable();
+
+    var pointer = inst.canvas.getPointer(o.e);
+    origX = pointer.x;
+    origY =pointer.y;
+
+    var points = [pointer.x, pointer.y, pointer.x, pointer.y];
+    var line = new fabric.Line(points, {
+      strokeWidth: 20,
+      stroke: 'gray',
+      fill: 'gray',
+      originX: 'center',
+      originY: 'center',
+      hasBorders: false,
+      hasControls: false
+    });
+    inst.canvas.add(line).setActiveObject(line);
+  };
+
+  Line.prototype.isEnable = function() {
+    return this.isDrawing;
+  }
+
+  Line.prototype.enable = function() {
+    this.isDrawing = true;
+  }
+
+  Line.prototype.disable = function() {
+    this.isDrawing = false;
+  }
+
+  return Line;
+}());
+
+
+
+var line = new Line(canvas);
+
+
+};
+
+
+
+$scope.addHLine = function() {
+  var Rectangle = (function () {
+    function Rectangle(canvas) {
+        var inst=this;
+        this.canvas = canvas;
+        this.className= 'Rectangle';
+        this.isDrawing = false;
+        this.bindEvents();
+    }
+
+   Rectangle.prototype.bindEvents = function() {
+    var inst = this;
+    inst.canvas.on('mouse:down', function(o) {
+      inst.onMouseDown(o);
+    });
+    inst.canvas.on('mouse:move', function(o) {
+      inst.onMouseMove(o);
+    });
+    inst.canvas.on('mouse:up', function(o) {
+      inst.onMouseUp(o);
+    });
+    inst.canvas.on('object:moving', function(o) {
+      inst.disable();
+    })
+  }
+    Rectangle.prototype.onMouseUp = function (o) {
+      var inst = this;
+      inst.disable();
+    };
+
+    Rectangle.prototype.onMouseMove = function (o) {
+      var inst = this;
+      
+
+      if(!inst.isEnable()){ return; }
+      console.log("mouse move rectange");
+      var pointer = inst.canvas.getPointer(o.e);
+      var activeObj = inst.canvas.getActiveObject();
+
+      activeObj.stroke= 'gray',
+      activeObj.strokeWidth= 5;
+      activeObj.fill = 'transparent';
+
+      if(origX > pointer.x){
+          activeObj.set({ left: Math.abs(pointer.x) }); 
+      }
+      if(origY > pointer.y){
+          activeObj.set({ top: Math.abs(pointer.y) });
+      }
+
+      activeObj.set({ width: 20});
+      activeObj.set({ height: Math.abs(origY - pointer.y) });
+
+      activeObj.setCoords();
+      inst.canvas.renderAll();
+
+    };
+
+    Rectangle.prototype.onMouseDown = function (o) {
+      var inst = this;
+      inst.enable();
+
+      var pointer = inst.canvas.getPointer(o.e);
+      origX = pointer.x;
+      origY = pointer.y;
+
+      var rect = new fabric.Rect({
+          left: origX,
+          top: origY,
+          originX: 'left',
+          originY: 'top',
+          width: pointer.x-origX,
+          height: pointer.y-origY,
+          angle: 0,
+          fill: 'gray',
+          transparentCorners: false,
+          hasBorders: false,
+          hasControls: false
+      });
+
+      inst.canvas.add(rect).setActiveObject(rect);
+    };
+
+    Rectangle.prototype.isEnable = function(){
+      return this.isDrawing;
+    }
+
+    Rectangle.prototype.enable = function(){
+      this.isDrawing = true;
+    }
+
+    Rectangle.prototype.disable = function(){
+      this.isDrawing = false;
+    }
+
+    return Rectangle;
+}());
+
+
+
+var arrow = new Rectangle(canvas);
+
+
+  };
+
+
+
+$scope.addConnector = function() {
+  console.log("add connector");
+    var coord = getRandomLeftTop();
+    fabric.Image.fromURL('./images/centrifigalpump.png' , function(image) {
+      image.set({
+        left: coord.left,
+        top: coord.top,
+        scaleX: 0.2,
+        scaleY: 0.2
+      })
+      .setCoords();
+      canvas.add(image);
+    });
+  };
+
+
+
+
+
 $scope.addLanes = function() {
   console.log("Lanes");
     var coord = getRandomLeftTop();
@@ -1082,10 +1304,17 @@ function createSVGGauge(name, label, min, max)
       }
 
 
-$scope.addGauge = function(name,label,min,max) {
-  console.log("GaugeSS");
+$scope.addGauge = function() {
+
+  var name = document.getElementById("gaugename").value;
+    var label = document.getElementById("gaugelabel").value;
+    var min = parseInt(document.getElementById("gaugemin").value) ;
+    var max = parseInt(document.getElementById("gaugemax").value);
+    var gauSpan = document.createElement("span");
+    gauSpan.setAttribute("id", name +"GaugeContainer");
+    document.getElementById("createGauge").appendChild(gauSpan);
 //  createSVGGauge("memory", "Memory");
-  
+  //createSVGGauge(name, label, min , max);
 //var name = "memory";
 //var label = "Memory";
 //var min = 0;
@@ -1098,7 +1327,8 @@ var config =
           min: undefined != min ? min : 0,
           max: undefined != max ? max : 100,
           Value: val,
-          minorTicks: 5
+          minorTicks: 5,
+          id: "lassaad"
         }
         
         var range = config.max - config.min;
@@ -1107,19 +1337,57 @@ var config =
         
         gauges[name] = new Gauge(name + "GaugeContainer", config);
         gauges[name].render();
+        var overflow = 0; 
+        val = min - overflow + (max - min + overflow*2) *  Math.random();
         gauges[name].redraw(val);
-console.log("fFFGaugeSS");
-console.log(gauges[name]);
-console.log("DDDGaugeSS");
-var fff  = document.getElementById("memoryGaugeContainer").lastChild;
+
+var fff  = document.getElementById(name+"GaugeContainer").lastChild;
+ var x = document.createElement("INPUT");
+    x.setAttribute("type", "text");
+    x.setAttribute("value", val);
+    x.setAttribute("id", "gauge"+name);
+    x.setAttribute("data-name", name);
+    x.setAttribute("ng-model", name);
+    x.setAttribute("ng-change", "updateGaugeVal()");
+    document.getElementById("gaugesValue").appendChild(x);
 //updateGauges();
 
 consoleSVGValue = fff.outerHTML;
  
-console.log(consoleSVGValue);
-_loadSVG(consoleSVGValue);
+
+var dis = fabric.loadSVGFromString(consoleSVGValue, function(objects, options) {
+       options = {name :name , label: label, minVal: min, maxVal:max,value : val }; 
+      var obj = fabric.util.groupSVGElements(objects, options);
+      canvas.add(obj).centerObject(obj).sendBackwards(obj).renderAll();
+      obj.setCoords();
+    });
+
+var laneGauge = new fabric.Rect({
+    width: 5,
+    height: 50,
+    angle:30,
+    stroke: '#aaf',
+    strokeWidth: 5,
+    fill: '#faa',
+    selectable: false
+  });
 
 
+//var group1 = new fabric.Group([ dis, laneGauge ], { left: 100, top: 100 });
+//canvas.add(group1);
+
+
+//we need to fix this line
+//  canvas.add(laneGauge).centerObject(laneGauge).bringToFront(laneGauge).renderAll();
+
+var randVal = val / range * 270 - (min / range * 270 + 45);
+laneGauge.animate('angle', laneGauge.angle === 0? randVal : 360 , {
+      duration: 1000,
+      onChange: canvas.renderAll.bind(canvas),
+      onComplete: function() {
+      },
+      easing: fabric.util.ease["easeInOutQuart"]
+    });
     /*var coord = getRandomLeftTop();
     fabric.Image.fromURL('./images/lane.png' , function(image) {
       image.set({
@@ -1131,6 +1399,71 @@ _loadSVG(consoleSVGValue);
       //canvas.add(gauges[name].render());
     });*/
   };
+
+
+
+
+
+
+
+
+
+
+
+
+$scope.updateGaugeVal = function() {
+    console.log("Update the Val");  
+    
+    var elem = canvas._objects;
+    console.log(elem);
+    for(var z =0 ; z < elem.length ; z++){
+
+        if(elem[z].hasOwnProperty('name')){
+          console.log("The Element is :" + z);
+            canvas.setActiveObject(canvas.item(z));
+
+
+            var name = elem[z].name;
+            var label = elem[z].label;
+            var min = elem[z].minVal;
+            var max = elem[z].maxVal;
+            var val = elem[z].value;
+            var posleft = elem[z].left;
+            var postop =elem[z].top;
+
+var activeObjects = canvas.getActiveObjects();
+    canvas.discardActiveObject()
+    if (activeObjects.length) {
+      canvas.remove.apply(canvas, activeObjects);
+    }
+
+
+                var fff  = document.getElementById(name+"GaugeContainer").lastChild;
+    consoleSVGValue = fff.outerHTML;
+ 
+fabric.loadSVGFromString(consoleSVGValue, function(objects, options) {
+       options = {name :name , label: label, minVal: min, maxVal:max,value : val }; 
+      var obj = fabric.util.groupSVGElements(objects, options);
+     obj.set({
+        left: posleft,
+        top: postop
+      }).setCoords();
+      canvas.add(obj).renderAll();
+      
+    });
+
+
+        }
+    }
+
+
+}
+
+
+
+
+
+
 
 
 

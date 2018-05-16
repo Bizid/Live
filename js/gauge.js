@@ -34,6 +34,7 @@ function Gauge(placeholderName, configuration)
     this.body = d3.select("#" + this.placeholderName)
               .append("svg:svg")
               .attr("class", "gauge")
+              .attr("name", this.config.id)
               .attr("width", this.config.size)
               .attr("height", this.config.size);
     
@@ -219,8 +220,8 @@ function Gauge(placeholderName, configuration)
     var pointer = pointerContainer.selectAll("path");
     pointer.transition()
           .duration(undefined != transitionDuration ? transitionDuration : this.config.transitionDuration)
-          //.delay(0)
-          //.ease("linear")
+          .delay(0)
+          .ease("linear")
           //.attr("transform", function(d) 
           .attrTween("transform", function()
           {
