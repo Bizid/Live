@@ -53,6 +53,8 @@
         
         gauges[name] = new Gauge(name + "GaugeContainer", config);
         gauges[name].render();
+
+        
       }
       
       /*function createGauges()
@@ -97,7 +99,7 @@
       function initialize()
       {
         //createGauges();
-        setInterval(updateGauges, 7000);
+      //  setInterval(updateGauges, 7000);
       }
       
     </script>
@@ -112,7 +114,7 @@
     <span id="memoryGaugeContainer" ng-bind-html="myText"></span>
 </div>
 <div id="gaugesValue"></div>
-<div style="position:relative;width:704px;float:left;" id="canvas-wrapper">
+<div style="position:relative;width:1100px;float:left;" id="canvas-wrapper">
 
   <div id="canvas-controls">
     
@@ -126,7 +128,7 @@
     </div>
   </div>
 
-  <canvas id="canvas" width="700" height="600"></canvas>
+  <canvas id="canvas" width="1100" height="1100"></canvas>
 
   <div id="color-opacity-controls" ng-show="canvas.getActiveObject()">
 
@@ -228,14 +230,16 @@
   </div>
 </div>
 
-<div id="commands" ng-click="maybeLoadShape($event)">
+<div id="commands" ng-click="maybeLoadShape($event)"  style="width:350px;">
 
   <ul class="nav nav-tabs">
     <li  class="active"><a href="#simple-shapes" data-toggle="tab">Simple</a></li>
+    <li><a href="#shape" data-toggle="tab">shape</a></li>
     <li><a href="#object-controls-pane" data-toggle="tab">Controls</a></li>
     <li><a href="#load-svg-pane" data-toggle="tab">Load SVG</a></li>
     <li><a href="#execute-code" data-toggle="tab">Execute</a></li>
     <li><a href="#json-inout" data-toggle="tab">JSON</a></li>
+
   </ul>
 
   <div class="tab-content">
@@ -243,13 +247,13 @@
    
 
     <div class="tab-pane active" id="simple-shapes">
+
+
+
       <p>Add <strong></strong> to canvas:</p>
       <ul class="svg-shapes">
-        <li><button type="button" class="btn tank" ng-click="addHLine()">Horizontal Line</button></li>
-        <li><button type="button" class="btn tank" ng-click="addVLine()">Vertical Line</button></li>
-        <li><button type="button" class="btn tank" ng-click="addConnector()">Add line connector</button></li>
         <li><button type="button" class="btn tank" ng-click="addLanes()">Lanes</button></li>
-<li><button type="button" class="btn tank" ng-click="addTanks()">Tanks</button></li>
+<li><button type="button" class="btn tank" ng-click="addTanks('lase')">Tanks</button></li>
 <li><button type="button" class="btn tank" ng-click="addWaterWells()">Water Wells</button></li>
 <li><button type="button" class="btn tank" ng-click="addPumps()">Pumps</button></li>
 <li><button type="button" class="btn tank" ng-click="addChargePumps()">Charge Pumps</button></li>
@@ -267,7 +271,27 @@
 <li><button type="button" class="btn tank" ng-click="addPressureSensors()">Pressure Sensors</button></li>
 <li><button type="button" class="btn tank" ng-click="addWellInjection()">Well Injection Sites</button></li>
 <li><button type="button" class="btn tank" ng-click="addItemsGroup()">Add Items Group</button></li>
-<li>
+
+      </ul>
+<p>Draw Tank</p>
+<ul class="svg-shapes">
+        <li>
+  <input type="text" id="tankname">
+ <button type="button" class="btn tank" ng-click="addTanks()">Add Tank</button></li>    
+
+ <li> <input type="text" id="tankWaterToUpdate"><button type="button" class="btn tank" ng-click="increaseWater()">increase water</button><button type="button" class="btn tank" ng-click="decreaseWater()">decrease water</button></li>
+<li> <input type="text" id="tankOilToUpdate"><button type="button" class="btn tank" ng-click="increaseOil()">increase oil</button><button type="button" class="btn tank" ng-click="decreaseOil()">decrease oil</button></li>
+
+<li> <input type="text" id="TankCurrentValue"><button type="button" class="btn tank" ng-click="updateTankCurrentValue()">Change current tank value</button></li>
+
+    </ul>
+
+
+
+
+      <p>Draw Gauge</p>
+      <ul class="svg-shapes">
+        <li>
   <input type="text" id="gaugename">
   <input type="text" id="gaugelabel">
   <input type="text" id="gaugemin">
@@ -284,10 +308,59 @@
 </script>
   <button type="button" class="btn tank" ng-click="addGauge()">Add Gauge</button></li>    
     <li style="display: none;"><button id="upGaugeBtn" type="button" class="btn tank" ng-click="updateGaugeVal()">Update Gauge</button></li>
-    <li><button type="button" class="btn tank" ng-click="addLaneGauge()">Drawwwww</button></li>
-         <li><button type="button" class="btn tank" ng-click="animateLaneGauge()">Animate</button></li>
+    <li style="display: none;"><button type="button" class="btn tank" ng-click="addLaneGauge()">Drawwwww</button></li>
+         <li style="display: none;"><button type="button" class="btn tank" ng-click="animateLaneGauge()">Animate</button></li> 
       </ul>
 
+
+      <p>Draw Horizontal Line:</p>
+        <!--button id="hDrawing-mode" class="btn btn-info"
+          ng-click="setFreeDrawingMode(!getHFreeDrawingMode())"
+          ng-class="{'btn-inverse': getHFreeDrawingMode()}">
+          {[ getHFreeDrawingMode() ? 'Finish Horizental drawing mode' : 'Start Horizental drawing mode' ]}
+        </button-->
+
+
+        <button id="hDrawing-mode" class="btn btn-info"
+          ng-click="setPipelineDrawingMode(!getPipelineDrawingMode(),'horizontal')"
+          ng-class="{'btn-inverse': getPipelineDrawingMode()}">
+          {[ getPipelineDrawingMode() ? 'Finish Horizental drawing mode' : 'Start Horizental drawing mode' ]}
+        </button>
+
+
+      <!--ul class="svg-shapes">
+        <li><button type="button" class="btn tank" ng-click="addHLine()">Horizontal Line</button></li>
+      </ul-->
+
+
+      <p>Draw Vertical Line:</p>
+     
+      <button id="vDrawing-mode" class="btn btn-info"
+          ng-click="setPipelineDrawingMode(!getPipelineDrawingMode(),'vertical')"
+          ng-class="{'btn-inverse': getPipelineDrawingMode()}">
+          {[ getPipelineDrawingMode() ? 'Finish Vertical drawing mode' : 'Start vertical drawing mode' ]}
+        </button>
+
+      <!--p>Draw arc connection:</p-->
+      <ul class="svg-shapes">
+        <li><button type="button" class="btn tank" ng-click="updateFillWaterForPipeline()">fill active with water</button></li>
+        <li><button type="button" class="btn tank" ng-click="unfillFillWaterForPipeline()">unfill active with water</button></li>
+
+
+
+         <!--li><button type="button" class="btn tank" ng-click="editPipeline()">edit pipeline</button></li-->
+      </ul>
+
+
+
+
+
+      <!--select id="drawing-mode-selector" bind-value-to="drawingMode">
+            <option>TopLeft</option>
+            <option>TopRight</option>
+            <option>BottomLeft</option>
+            <option>BottomRight</option>
+          </select-->
 
 
     </div>
@@ -466,6 +539,36 @@
       </button>
     </div>
 
+<div class="tab-pane" id="shape">
+      <p>Customize Table</p>
+          <span>width: </span><input type="text" id="shapeColWidth">
+          <span>height: </span><input type="text" id="shapeColHeight">
+          <span>Show Header: </span><input type="checkbox" id="shapeShowHeader"><input type="text" id="shapeNameHeader"><input type="text" id="shapeValueHeader">
+          
+         <ul>
+           <strong>Show/hide</strong>
+           <strong>Name</strong>
+           <strong>Value</strong>
+         </ul> 
+
+      <ul id="shape-list">
+        <li>
+          <input type="checkbox" data-name="colCheck">
+          <input type="text" data-name="colName">
+          <input type="text" data-name="colVal">
+        </li>
+
+      </ul>
+      <button type="button" class="btn" ng-click="addLinePattern()">
+        Add line
+      </button>
+      <button type="button" class="btn" ng-click="generatePattern()">
+        Generate
+      </button>
+    </div>
+
+
+
       <div class="tab-pane" id="execute-code">
         <textarea id="canvas-console" bind-value-to="console">
         </textarea>
@@ -509,8 +612,311 @@
 
     </div>
 
-    <script>
-     
+<table class="basic-table">
+  <tbody>
+   <tr class="title">
+    <td colspan="2" class="bms-label running">Running</td>
+  </tr>
+   <tr>
+    <td class="bms-label">Name</td>
+    <td class="bms-label">Value</td>
+  </tr>
+  <tr>
+    <td colspan="2">Hermosa 500K Pit Summary</td>
+  </tr> 
+  <tr>
+    <td>volume</td>
+    <td>12' 5''</td>
+  </tr>
+  <tr>
+    <td>water</td>
+    <td>591768.5 bbls</td>
+  </tr>
+  </tbody>
+</table>
+
+<div id="patt">
+  <svg name="ddd" width="300" height="200">
+           <foreignObject width="100%" height="100%">
+           <div xmlns="http://www.w3.org/1999/xhtml" style="font-size:30px">
+<table class="basic-table">
+  <tbody>
+   <tr class="title">
+    <td colspan="2" class="bms-label running">Running</td>
+  </tr>
+   <tr>
+    <td class="bms-label">Name</td>
+    <td class="bms-label">Value</td>
+  </tr>
+  <tr>
+    <td colspan="2">Hermosa 500K Pit Summary</td>
+  </tr> 
+  <tr>
+    <td>volume</td>
+    <td>12' 5''</td>
+  </tr>
+  <tr>
+    <td>water</td>
+    <td>591768.5 bbls</td>
+  </tr>
+  </tbody>
+</table>
+</div>
+           </foreignObject>
+           </svg>
+
+</div>
+
+<div id="pattern"></div>
+
+<script>
+
+  // Table module ////////////////////////////////////
+var Table = function module() {
+    var opts = {
+        width: 200,
+        height: 200,
+        margins: {top: 0, right: 0, bottom: 0, left: -40}
+    };
+
+    function exports(selection) {
+        selection.each(function (dataset) {
+
+            //________________________________________________
+            // Data
+            //________________________________________________
+            var columnLabel = dataset.columnLabel;
+            var rowLabel = dataset.rowLabel;
+            var value = dataset.value;
+
+            //________________________________________________
+            // DOM preparation
+            //________________________________________________
+            // Size
+            var chartW = Math.max(opts.width - opts.margins.left - opts.margins.right, 0.1);
+            var chartH = Math.max(opts.height - opts.margins.top - opts.margins.bottom, 0.1);
+
+            // SVG
+            var parentDiv = d3.select(this).html('');
+            var svg = parentDiv.append('svg').attr('width', opts.width).attr('height', opts.height);
+            var visSvg = svg.append('g').attr('class', 'vis-group').attr('transform', 'translate(' + opts.margins.left + ',' + opts.margins.top + ')');
+            var tableBodySvg = visSvg.append('g').attr('class', 'chart-group');
+            var tableHeaderSvg = visSvg.append('g').attr('class', 'chart-group');
+            var rowHeaderSvg = tableHeaderSvg.append('g').attr('class', 'row-header');
+            var colHeaderSvg = tableHeaderSvg.append('g').attr('class', 'col-header');
+
+            //________________________________________________
+            // Table
+            //________________________________________________
+            var rowHeaderLevelNum = 1;
+            var colHeaderLevelNum = 1;
+            var cellH = chartH / (value.length + rowHeaderLevelNum);
+            var cellW = chartW / (value[0].length + colHeaderLevelNum);
+            //var cellW = 60;
+            console.log("hight:" + cellH );
+            console.log("width:" + cellW);
+            // Row header
+           // var rowHeaderCell = rowHeaderSvg.selectAll('rect.row-header-cell')
+             //   .data(rowLabel);
+            /*rowHeaderCell.enter().append('rect')
+                .attr({
+                    class:'row-header-cell',
+                    width:cellW, height:cellH,
+                    x: 0,
+                    y: function(d, i){return i * cellH + (cellH * colHeaderLevelNum)}
+                })
+                .style({fill:'#eee', stroke:'silver'});
+
+            // Row header text
+            rowHeaderCell.enter().append('text')
+                .attr({
+                    class:'row-header-content',
+                    x: 0,
+                    y: function(d, i){return i * cellH + (cellH * colHeaderLevelNum)},
+                    dx: cellW/2,
+                    dy: cellH/2
+                })
+                .style({fill:'black', 'text-anchor':'middle'})
+                .text(function(d, i){return d;});*/
+
+            // Col header
+            var colHeaderCell = colHeaderSvg.selectAll('rect.col-header-cell')
+                .data(columnLabel);
+            colHeaderCell.enter().append('rect')
+                .attr({
+                    class:'col-header-cell',
+                    width:cellW, height:cellH,
+                    x: function(d, i){return i * cellW + (cellW * rowHeaderLevelNum)},
+                    y: 0
+                })
+                .style({fill:'#eee', stroke:'silver'});
+
+            // Col header text
+            colHeaderCell.enter().append('text')
+                .attr({
+                    class:'col-header-content',
+                    x: function(d, i){return i * cellW + (cellW * rowHeaderLevelNum)},
+                    y: 0,
+                    dx: cellW/2,
+                    dy: cellH/2
+                })
+                .style({fill:'black', 'text-anchor':'middle'})
+                .text(function(d, i){return d;});
+
+            // Body
+            var row = tableBodySvg.selectAll('g.row')
+                .data(value);
+            row.enter().append('g')
+                .attr('class', 'cell row')
+                .each(function(pD, pI){
+                    // Cells
+                    console.log("ija"+pD );
+                    var str = pD + "";
+                    var st = str.split(",");
+                    console.log("new"+st[0]);
+if(st[1] == ""){
+  console.log("One Col" + pD);
+   console.log("One Col this" + this);
+console.log(typeof 'pD'); 
+//pD = pD.substr(1);
+console.log("two Col" + pD);
+var cell = d3.select(this)
+                        .selectAll('rect.cell')
+                        .data(pD);
+                    cell.enter().append('rect')
+                        .attr({
+                            class:'cell', width:cellW*2, height:cellH,
+                            x: function(d, i){return i * cellW + (cellW * rowHeaderLevelNum)},
+                            y: function(d, i){return pI * cellH + cellH}
+                        })
+                        .style({fill:'white', stroke:'silver'});
+                    // Text
+                    var colText = "";
+                   cell.enter().append('text')
+                        .attr({
+                            class:'cell-content', width:cellW*2, height:cellH,
+                            x: function(d, i){
+                              return i * cellW + (cellW * rowHeaderLevelNum)},
+                            y: function(d, i){return pI * cellH + cellH},
+                            dx: cellW/2,
+                            dy: cellH/2
+                        })
+                        .style({fill:'black', 'text-anchor':'middle'})
+                        .text(function(d, i){
+console.log("i--"+i);
+                    console.log("d--"+d);
+if(d!= null){ colText += d; return d;}
+
+                          });
+
+
+                        /*
+//fix the wrap function so we can add colspans  
+                        cell.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+    .selectAll(".cell text")
+      .call(wrap(cell[0],cellW) );*/
+
+console.log("0000"+colText);
+
+}else{
+
+var cell = d3.select(this)
+                        .selectAll('rect.cell')
+                        .data(pD);
+                    cell.enter().append('rect')
+                        .attr({
+                            class:'cell', width:cellW, height:cellH,
+                            x: function(d, i){return i * cellW + (cellW * rowHeaderLevelNum)},
+                            y: function(d, i){return pI * cellH + cellH}
+                        })
+                        .style({fill:'black', stroke:'silver'});
+                    // Text
+                    cell.enter().append('text')
+                        .attr({
+                            class:'cell-content', width:cellW, height:cellH,
+                            x: function(d, i){return i * cellW + (cellW * rowHeaderLevelNum)},
+                            y: function(d, i){return pI * cellH + cellH},
+                            dx: cellW/2,
+                            dy: cellH/2
+                        })
+                        .style({fill:'white', 'text-anchor':'middle'})
+                        .text(function(d, i){return d;});
+
+
+}
+
+
+                    
+                });
+        });
+    }
+
+    exports.opts = opts;
+    createAccessors(exports, opts);
+    return exports;
+};
+  
+// Helper function ////////////////////////////////////                       
+var createAccessors = function(visExport) {
+    for (var n in visExport.opts) {
+        if (!visExport.opts.hasOwnProperty(n)) continue;
+        visExport[n] = (function(n) {
+            return function(v) {
+                return arguments.length ? (visExport.opts[n] = v, this) : visExport.opts[n];
+            }
+        })(n);
+    }
+};                        
+ 
+// Usage ////////////////////////////////////                        
+/*var dataset = {
+    //rowLabel: ['A', 'B', 'C', 'D', 'E'],
+    columnLabel: ['Name', 'Value'],
+    value: [[ "Hermosa 500K chwirrib",null], [5, "2' 5''"], [null, 2], [13, 14], [17, 18]]
+};
+                        
+var width = 160;
+var height = 300;
+
+var table = Table().width(width).height(height);
+
+d3.select("#pattern")
+    .datum(dataset)
+    .call(table);
+
+
+*/
+
+
+function wrap(text, width) {
+ console.log("Enter ---"+ text);
+ // text = text + "";
+  text.each(function() {
+    var text = d3.select(this),
+        words = text.text().split(/\s+/).reverse(),
+        word,
+        line = [],
+        lineNumber = 0,
+        lineHeight = 1.1, // ems
+        y = text.attr("y"),
+        dy = parseFloat(text.attr("dy")),
+        tspan = text.text(null).append("tspan").attr("x", 0).attr("y", y).attr("dy", dy + "em");
+    while (word = words.pop()) {
+      line.push(word);
+      tspan.text(line.join(" "));
+      if (tspan.node().getComputedTextLength() > width) {
+        line.pop();
+        tspan.text(line.join(" "));
+        line = [word];
+        tspan = text.append("tspan").attr("x", 0).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+      }
+    }
+  })};    
+</script>
+
+
 
   </body>
 </html>

@@ -310,16 +310,15 @@ var line = new Line(canvas);
 
 };
 
-
-
-$scope.addHLine = function() {
-  var Rectangle = (function () {
-    function Rectangle(canvas) {
+var Rectangle = (function () {
+    var dir = "";
+    function Rectangle(canvas, direction) {
         var inst=this;
         this.canvas = canvas;
         this.className= 'Rectangle';
         this.isDrawing = false;
         this.bindEvents();
+        dir = direction;
     }
 
    Rectangle.prototype.bindEvents = function() {
@@ -339,6 +338,7 @@ $scope.addHLine = function() {
   }
     Rectangle.prototype.onMouseUp = function (o) {
       var inst = this;
+     canvas.off('mouse:down').off('mouse:move').off('mouse:up');
       inst.disable();
     };
 
@@ -351,9 +351,9 @@ $scope.addHLine = function() {
       var pointer = inst.canvas.getPointer(o.e);
       var activeObj = inst.canvas.getActiveObject();
 
-      activeObj.stroke= 'gray',
-      activeObj.strokeWidth= 5;
-      activeObj.fill = 'transparent';
+      activeObj.stroke= '#E3E3E3';
+      activeObj.strokeWidth= 0;
+      activeObj.fill = '#E3E3E3';
 
       if(origX > pointer.x){
           activeObj.set({ left: Math.abs(pointer.x) }); 
@@ -362,8 +362,17 @@ $scope.addHLine = function() {
           activeObj.set({ top: Math.abs(pointer.y) });
       }
 
-      activeObj.set({ width: 20});
-      activeObj.set({ height: Math.abs(origY - pointer.y) });
+
+      if(dir == "horizontal"){
+        activeObj.set({ width: Math.abs(origX - pointer.x)});
+        activeObj.set({ height:  10});  
+      }
+      if(dir == "vertical"){
+        activeObj.set({ width: 10});
+        activeObj.set({ height: Math.abs(origY - pointer.y) });  
+      }
+
+      
 
       activeObj.setCoords();
       inst.canvas.renderAll();
@@ -378,19 +387,42 @@ $scope.addHLine = function() {
       origX = pointer.x;
       origY = pointer.y;
 
-      var rect = new fabric.Rect({
+
+
+if(dir == "horizontal"){
+        var rect = new fabric.Rect({
           left: origX,
           top: origY,
           originX: 'left',
           originY: 'top',
           width: pointer.x-origX,
-          height: pointer.y-origY,
+          height: 10,
           angle: 0,
-          fill: 'gray',
+          fill: '#E3E3E3',
           transparentCorners: false,
           hasBorders: false,
-          hasControls: false
-      });
+          hasControls: true,
+          lockScalingY : true
+       });
+      }
+      if(dir == "vertical"){
+        var rect = new fabric.Rect({
+          left: origX,
+          top: origY,
+          originX: 'left',
+          originY: 'top',
+          width: 10,
+          height: pointer.y-origY,
+          angle: 0,
+          fill: '#E3E3E3',
+          transparentCorners: false,
+          hasBorders: false,
+          hasControls: true,
+          lockScalingX : true,
+          lockRotation : true
+       });
+  
+      }
 
       inst.canvas.add(rect).setActiveObject(rect);
     };
@@ -406,16 +438,191 @@ $scope.addHLine = function() {
     Rectangle.prototype.disable = function(){
       this.isDrawing = false;
     }
-
     return Rectangle;
 }());
 
+$scope.editPipeline = function() {
+  
+console.log("th");
 
 
-var arrow = new Rectangle(canvas);
-
+canvas.getActiveObject();
+     setActiveProp('lockScalingY', true);
 
   };
+
+
+
+ $scope.getPipelineDrawingMode = function() {
+    return canvas.isDrawing;
+  };
+  $scope.setPipelineDrawingMode = function(value, dir) {
+    
+      if(dir == "horizontal"){
+        var arrow = new Rectangle(canvas, "horizontal");  
+      }
+      if(dir == "vertical"){
+        var arrow = new Rectangle(canvas, "vertical");  
+      }
+      
+    canvas.isDrawing = !!value;
+     
+
+    $scope.$$phase || $scope.$digest();
+  };
+
+  /*$scope.freeDrawingMode = 'hline';*/
+
+ /* $scope.getPipelineDrawingMode = function() {
+    return $scope.freeDrawingMode;
+  };*/
+  /*$scope.setPipelineDrawingMode = function(type) {
+    $scope.pipelineDrawingMode = type;
+
+    if (type === 'hline') {
+      //canvas.pipelineDrawingBrush = $scope.vLinepipelineBrush;
+      addHLine();
+    }
+    else if (type === 'vline') {
+      canvas.pipelineDrawingBrush = $scope.hLinePipelineBrush;
+    }
+    else if (type === 'square') {
+      canvas.pipelineDrawingBrush = $scope.arcpipelineBrush;
+    }
+
+    $scope.$$phase || $scope.$digest();
+  };
+
+*/
+
+
+
+$scope.updateFillWaterForPipeline = function() {
+  console.log("add updateFillWaterForPipeline");
+    canvas.getActiveObject();
+    setActiveStyle('fill', "#00B6D9");
+    canvas.discardActiveObject()
+  };
+
+  $scope.unfillFillWaterForPipeline = function() {
+  console.log("add unfillFillWaterForPipeline");
+    canvas.getActiveObject();
+    setActiveStyle('fill', "#E3E3E3");
+    canvas.discardActiveObject()
+  };
+
+$scope.increaseWater = function() {
+    console.log("increase Water");
+    var tankName = document.getElementById("tankWaterToUpdate").value;
+    var elements = canvas._objects;
+    for(var j=0; j < elements.length ; j++){
+      if(elements[j].hasOwnProperty('name')){
+        if(elements[j].name == tankName ){
+          canvas.setActiveObject(canvas.item(j));
+          canvas.getActiveObject();
+          var list = canvas._activeObject._objects;
+          for(var i =0 ; i < list.length; i++ ){
+            if(list[i].id == "water"){
+              list[i].set({height : list[i].height + 5 });
+            }
+          }
+          canvas.discardActiveObject();
+        }
+      }
+    }
+  };
+
+$scope.decreaseWater = function() {
+    console.log("increase Water");
+    var tankName = document.getElementById("tankWaterToUpdate").value;
+    var elements = canvas._objects;
+    for(var j=0; j < elements.length ; j++){
+      if(elements[j].hasOwnProperty('name')){
+        if(elements[j].name == tankName ){
+          canvas.setActiveObject(canvas.item(j));
+          canvas.getActiveObject();
+          var list = canvas._activeObject._objects;
+          for(var i =0 ; i < list.length; i++ ){
+            if(list[i].id == "water"){
+              list[i].set({height : list[i].height - 5 });
+            }
+          }
+          canvas.discardActiveObject();
+
+        }
+      }
+    }
+  };
+
+
+$scope.increaseOil = function() {
+    console.log("increase Oil");
+    var tankName = document.getElementById("tankOilToUpdate").value;
+    var elements = canvas._objects;
+    for(var j=0; j < elements.length ; j++){
+      if(elements[j].hasOwnProperty('name')){
+        if(elements[j].name == tankName ){
+          canvas.setActiveObject(canvas.item(j));
+          canvas.getActiveObject();
+          var list = canvas._activeObject._objects;
+          for(var i =0 ; i < list.length; i++ ){
+            if(list[i].id == "oil"){
+              list[i].set({height : list[i].height + 5 });
+            }
+          }
+          canvas.discardActiveObject();
+        }
+      }
+    }
+  };
+
+$scope.decreaseOil = function() {
+    console.log("increase Oil");
+    var tankName = document.getElementById("tankOilToUpdate").value;
+    var elements = canvas._objects;
+    for(var j=0; j < elements.length ; j++){
+      if(elements[j].hasOwnProperty('name')){
+        if(elements[j].name == tankName ){
+          canvas.setActiveObject(canvas.item(j));
+          canvas.getActiveObject();
+          var list = canvas._activeObject._objects;
+          for(var i =0 ; i < list.length; i++ ){
+            if(list[i].id == "oil"){
+              list[i].set({height : list[i].height - 5 });
+            }
+          }
+          canvas.discardActiveObject();
+
+        }
+      }
+    }
+  };
+
+
+$scope.updateTankCurrentValue = function() {
+    console.log("update tank current value ");
+    var tankName = document.getElementById("tankWaterToUpdate").value;
+    var tankCurrentValue = document.getElementById("TankCurrentValue").value;
+    var elements = canvas._objects;
+    for(var j=0; j < elements.length ; j++){
+      if(elements[j].hasOwnProperty('name')){
+        if(elements[j].name == tankName ){
+          canvas.setActiveObject(canvas.item(j));
+          canvas.getActiveObject();
+          var list = canvas._activeObject._objects;
+          for(var i =0 ; i < list.length; i++ ){
+            if(list[i].id == "title"){
+              list[i].set({text : tankCurrentValue });
+            }
+          }
+          canvas.discardActiveObject();
+        }
+      }
+    }
+  };
+
+
+
 
 
 
@@ -440,6 +647,7 @@ $scope.addConnector = function() {
 
 $scope.addLanes = function() {
   console.log("Lanes");
+
     var coord = getRandomLeftTop();
     fabric.Image.fromURL('./images/lane.png' , function(image) {
       image.set({
@@ -451,19 +659,76 @@ $scope.addLanes = function() {
     });
   };
 
-
-  $scope.addTanks = function() {
+$scope.addTanks = function() {
   console.log("Tanks");
+
+var name = document.getElementById("tankname").value;
+
+  var myimg;
+  var rectWater = new fabric.Rect({
+        fill: '#178BCA',
+        width: 43,
+        height: 40,
+        id: 'water',
+        angle: 180,
+        top:82,
+        left:59
+    });
+  rectWater.setGradient('fill', {
+    type: 'linear',
+    x1: 0,
+    y1: -rectWater.height / 2,
+    x2: 0,
+    y2: rectWater.height / 2,
+    colorStops: {
+        0: '#1488cc',
+        1: '#2b32b2'
+    }
+});
+
+  var rectOil = new fabric.Rect({
+        fill: '#000',
+        width: 43,
+        height: 60,
+        id: 'oil',
+        angle: 180,
+        top:82,
+        left:59
+    });
+
+  rectOil.setGradient('fill', {
+    type: 'linear',
+    x1: 0,
+    y1: -rectOil.height / 2,
+    x2: 0,
+    y2: rectOil.height / 2,
+    colorStops: {
+        0: '#232526',
+        1: '#414345'
+    }
+});
+
+  var text = new fabric.Text('20\' 7\'\'', {
+  fontSize: 12, 
+  left: 20,
+  top: 40,
+  fill: 'white',
+  id:'title'
+});
+
     var coord = getRandomLeftTop();
-    fabric.Image.fromURL('./images/tank.png' , function(image) {
-      image.set({
-        left: coord.left,
-        top: coord.top,
-        scaleX: 0.2,
-        scaleY: 0.2
-      })
-      .setCoords();
-      canvas.add(image);
+    fabric.Image.fromURL('./images/thesmallertank.png' , function(image) {
+      myimg= image.set({
+        scaleX: 0.7,
+        scaleY: 0.7
+      });
+      var group = new fabric.Group([ myimg, rectOil,rectWater,text], {
+            left: 50,
+            top: 50,
+            name:name
+        });
+
+      canvas.add(group);
     });
   };
 
@@ -496,6 +761,159 @@ $scope.addLanes = function() {
       canvas.add(image);
     });
   };
+
+
+$scope.addLinePattern= function() {
+console.log("add Line Pattern");
+
+ var name = document.getElementById("gaugename").value;
+    var label = document.getElementById("gaugelabel").value;
+    var min = parseInt(document.getElementById("gaugemin").value) ;
+    var max = parseInt(document.getElementById("gaugemax").value);
+    var gauSpan = document.createElement("span");
+    gauSpan.setAttribute("id", name +"GaugeContainer");
+    document.getElementById("createGauge").appendChild(gauSpan);
+
+    var elemLi = document.createElement("li");
+    
+
+    var elemCheckBox = document.createElement("input");
+    elemCheckBox.setAttribute("type", "checkbox");
+    elemCheckBox.setAttribute("data-name", "colCheck");
+
+
+    var elemNameCol = document.createElement("input");
+    elemNameCol.setAttribute("type", "text");
+    elemNameCol.setAttribute("data-name","colName");
+
+    var elemValueCol = document.createElement("input");
+    elemValueCol.setAttribute("type", "text");
+    elemValueCol.setAttribute("data-name","colVal");
+
+    elemLi.appendChild(elemCheckBox);
+    elemLi.appendChild(elemNameCol);
+    elemLi.appendChild(elemValueCol);
+
+
+document.getElementById("shape-list").appendChild(elemLi);
+
+
+};
+
+
+
+
+$scope.generatePattern = function() {
+  console.log("generatePattern");
+
+
+// Usage ////////////////////////////////////                        
+var dataset = {
+    //rowLabel: ['A', 'B', 'C', 'D', 'E'],
+    //columnLabel: ['Name', 'Value'],
+    columnLabel: [],
+    value: []
+};
+if(document.getElementById("shapeShowHeader").checked){
+  var nameHeader = document.getElementById("shapeNameHeader").value;
+  var valueHeader = document.getElementById("shapeValueHeader").value;
+  dataset["columnLabel"].push(nameHeader);
+     dataset["columnLabel"].push(valueHeader);
+}
+
+
+ 
+
+
+
+var list =  document.getElementById("shape-list").children;
+for(var k  = 0; k < list.length; k++){
+   var elem = list[k];
+   console.log(elem);
+   var name ="" ;
+   var val = "";
+   var check = false;
+   for(var l  = 0; l < elem.children.length; l++){
+      var elemDataName = elem.children[l].getAttribute('data-name');
+
+
+      if(elemDataName == "colName"){
+        name = elem.children[l].value;
+        console.log("Name:"+ name) ;  
+      }
+      if(elemDataName == "colVal"){
+        val = elem.children[l].value
+        console.log("Value:"+ val) ;  
+      }
+      if(elemDataName == "colCheck"){
+        check = elem.children[l].checked;
+        console.log("check:"+ check) ;  
+      }
+
+      if(elemDataName == "colWidth"){
+        width = elem.children[l].value;
+        console.log("check:"+ width) ;  
+      }
+
+      
+
+   }
+   if(name != "" && val !== "" && check != false ){
+      dataset["value"].push([ name,val]);  
+      }
+      
+
+
+   // fruitCount = 
+
+}
+
+
+//var width = 160;
+//var height = 300;
+
+var width = document.getElementById("shapeColWidth").value;
+var height = document.getElementById("shapeColHeight").value;                   
+
+if(width <10){
+  width =160;
+}
+
+if(height <10){
+  height =60;
+}
+
+var table = Table().width(width).height(height);
+
+d3.select("#pattern")
+    .datum(dataset)
+    .call(table);
+
+
+
+
+
+var fff  = document.getElementById("pattern").children[0];
+ console.log(fff);
+consoleSVGValue = fff.outerHTML;
+ 
+
+fabric.loadSVGFromString(consoleSVGValue, function(objects, options) {
+      var obj = fabric.util.groupSVGElements(objects, options);
+      console.log("cc" + obj);
+      canvas.add(obj).centerObject(obj).renderAll();
+      obj.setCoords();
+    });
+
+
+
+
+
+
+  };
+
+
+
 
 
 $scope.addChargePumps = function() {
@@ -1341,6 +1759,7 @@ var config =
         val = min - overflow + (max - min + overflow*2) *  Math.random();
         gauges[name].redraw(val);
 
+
 var fff  = document.getElementById(name+"GaugeContainer").lastChild;
  var x = document.createElement("INPUT");
     x.setAttribute("type", "text");
@@ -1351,17 +1770,19 @@ var fff  = document.getElementById(name+"GaugeContainer").lastChild;
     x.setAttribute("ng-change", "updateGaugeVal()");
     document.getElementById("gaugesValue").appendChild(x);
 //updateGauges();
-
+console.log("aa");
+console.log(fff);
 consoleSVGValue = fff.outerHTML;
  
 
 var dis = fabric.loadSVGFromString(consoleSVGValue, function(objects, options) {
        options = {name :name , label: label, minVal: min, maxVal:max,value : val }; 
       var obj = fabric.util.groupSVGElements(objects, options);
+      console.log("dd"+obj);
       canvas.add(obj).centerObject(obj).sendBackwards(obj).renderAll();
       obj.setCoords();
     });
-
+console.log("bb");
 var laneGauge = new fabric.Rect({
     width: 5,
     height: 50,
@@ -1399,13 +1820,6 @@ laneGauge.animate('angle', laneGauge.angle === 0? randVal : 360 , {
       //canvas.add(gauges[name].render());
     });*/
   };
-
-
-
-
-
-
-
 
 
 
@@ -1464,11 +1878,6 @@ fabric.loadSVGFromString(consoleSVGValue, function(objects, options) {
 
 
 
-
-
-
-
-
   $scope.saveJSON = function() {
     _saveJSON(JSON.stringify(canvas));
   };
@@ -1489,12 +1898,7 @@ fabric.loadSVGFromString(consoleSVGValue, function(objects, options) {
   };
 
 
-  var simpleGauge  = (
-    '<svg width="100%" height="100%" version="1.1" xmlns="http://www.w3.org/2000/svg">' +
-      '<rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:1;stroke:rgb(0,0,0)"/>' +
-    '</svg>'
-  );
-
+ 
 
 
 
@@ -1588,6 +1992,9 @@ fabric.loadSVGFromString(consoleSVGValue, function(objects, options) {
   }
 
  // addTexts();
+
+
+
 
 
   $scope.getPreserveObjectStacking = function() {
@@ -1799,6 +2206,221 @@ fabric.loadSVGFromString(consoleSVGValue, function(objects, options) {
   }
 }
 
+
+//connect elements start
+
+function findNewPos(distX, distY, target, obj) {
+  // See whether to focus on X or Y axis
+  if(Math.abs(distX) > Math.abs(distY)) {
+    if (distX > 0) {
+      target.setLeft(obj.getLeft() - target.getWidth());
+    } else {
+      target.setLeft(obj.getLeft() + obj.getWidth());
+    }
+  } else {
+    if (distY > 0) {
+      target.setTop(obj.getTop() - target.getHeight());
+    } else {
+      target.setTop(obj.getTop() + obj.getHeight());
+    }
+  }
+}
+
+var snap = 20; //Pixels to snap
+var canvasWidth = document.getElementById('canvas-controls').width;
+var canvasHeight = document.getElementById('canvas-controls').height;
+//console.log("ss");
+canvas.on('object:moving', function (options) {
+  //console.log("sddd");
+  // Sets corner position coordinates based on current angle, width and height
+  options.target.setCoords();
+
+  // Don't allow objects off the canvas
+  if(options.target.getLeft() < snap) {
+    options.target.setLeft(0);
+  }
+
+  if(options.target.getTop() < snap) {
+    options.target.setTop(0);
+  }
+
+  if((options.target.getWidth() + options.target.getLeft()) > (canvasWidth - snap)) {
+    options.target.setLeft(canvasWidth - options.target.getWidth());
+  }
+
+  if((options.target.getHeight() + options.target.getTop()) > (canvasHeight - snap)) {
+    options.target.setTop(canvasHeight - options.target.getHeight());
+  }
+
+  // Loop through objects
+  canvas.forEachObject(function (obj) {
+    if (obj === options.target) return;
+
+    // If objects intersect
+    if (options.target.isContainedWithinObject(obj) || options.target.intersectsWithObject(obj) || obj.isContainedWithinObject(options.target)) {
+
+      var distX = ((obj.getLeft() + obj.getWidth()) / 2) - ((options.target.getLeft() + options.target.getWidth()) / 2);
+      var distY = ((obj.getTop() + obj.getHeight()) / 2) - ((options.target.getTop() + options.target.getHeight()) / 2);
+
+      // Set new position
+      findNewPos(distX, distY, options.target, obj);
+    }
+
+    // Snap objects to each other horizontally
+
+    // If bottom points are on same Y axis
+    if(Math.abs((options.target.getTop() + options.target.getHeight()) - (obj.getTop() + obj.getHeight())) < snap) {
+      // Snap target BL to object BR
+      if(Math.abs(options.target.getLeft() - (obj.getLeft() + obj.getWidth())) < snap) {
+        options.target.setLeft(obj.getLeft() + obj.getWidth());
+        options.target.setTop(obj.getTop() + obj.getHeight() - options.target.getHeight());
+      }
+
+      // Snap target BR to object BL
+      if(Math.abs((options.target.getLeft() + options.target.getWidth()) - obj.getLeft()) < snap) {
+        options.target.setLeft(obj.getLeft() - options.target.getWidth());
+        options.target.setTop(obj.getTop() + obj.getHeight() - options.target.getHeight());
+      }
+    }
+
+    // If top points are on same Y axis
+    if(Math.abs(options.target.getTop() - obj.getTop()) < snap) {
+      // Snap target TL to object TR
+      if(Math.abs(options.target.getLeft() - (obj.getLeft() + obj.getWidth())) < snap) {
+        options.target.setLeft(obj.getLeft() + obj.getWidth());
+        options.target.setTop(obj.getTop());
+      }
+
+      // Snap target TR to object TL
+      if(Math.abs((options.target.getLeft() + options.target.getWidth()) - obj.getLeft()) < snap) {
+        options.target.setLeft(obj.getLeft() - options.target.getWidth());
+        options.target.setTop(obj.getTop());
+      }
+    }
+
+    // Snap objects to each other vertically
+
+    // If right points are on same X axis
+    if(Math.abs((options.target.getLeft() + options.target.getWidth()) - (obj.getLeft() + obj.getWidth())) < snap) {
+      // Snap target TR to object BR
+      if(Math.abs(options.target.getTop() - (obj.getTop() + obj.getHeight())) < snap) {
+        options.target.setLeft(obj.getLeft() + obj.getWidth() - options.target.getWidth());
+        options.target.setTop(obj.getTop() + obj.getHeight());
+      }
+
+      // Snap target BR to object TR
+      if(Math.abs((options.target.getTop() + options.target.getHeight()) - obj.getTop()) < snap) {
+        options.target.setLeft(obj.getLeft() + obj.getWidth() - options.target.getWidth());
+        options.target.setTop(obj.getTop() - options.target.getHeight());
+      }
+    }
+
+    // If left points are on same X axis
+    if(Math.abs(options.target.getLeft() - obj.getLeft()) < snap) {
+      // Snap target TL to object BL
+      if(Math.abs(options.target.getTop() - (obj.getTop() + obj.getHeight())) < snap) {
+        options.target.setLeft(obj.getLeft());
+        options.target.setTop(obj.getTop() + obj.getHeight());
+      }
+
+      // Snap target BL to object TL
+      if(Math.abs((options.target.getTop() + options.target.getHeight()) - obj.getTop()) < snap) {
+        options.target.setLeft(obj.getLeft());
+        options.target.setTop(obj.getTop() - options.target.getHeight());
+      }
+    }
+  });
+
+  options.target.setCoords();
+
+  // If objects still overlap
+
+  var outerAreaLeft = null,
+  outerAreaTop = null,
+  outerAreaRight = null,
+  outerAreaBottom = null;
+
+  canvas.forEachObject(function (obj) {
+    if (obj === options.target) return;
+
+    if (options.target.isContainedWithinObject(obj) || options.target.intersectsWithObject(obj) || obj.isContainedWithinObject(options.target)) {
+
+      var intersectLeft = null,
+      intersectTop = null,
+      intersectWidth = null,
+      intersectHeight = null,
+      intersectSize = null,
+      targetLeft = options.target.getLeft(),
+      targetRight = targetLeft + options.target.getWidth(),
+      targetTop = options.target.getTop(),
+      targetBottom = targetTop + options.target.getHeight(),
+      objectLeft = obj.getLeft(),
+      objectRight = objectLeft + obj.getWidth(),
+      objectTop = obj.getTop(),
+      objectBottom = objectTop + obj.getHeight();
+
+      // Find intersect information for X axis
+      if(targetLeft >= objectLeft && targetLeft <= objectRight) {
+        intersectLeft = targetLeft;
+        intersectWidth = obj.getWidth() - (intersectLeft - objectLeft);
+
+      } else if(objectLeft >= targetLeft && objectLeft <= targetRight) {
+        intersectLeft = objectLeft;
+        intersectWidth = options.target.getWidth() - (intersectLeft - targetLeft);
+      }
+
+      // Find intersect information for Y axis
+      if(targetTop >= objectTop && targetTop <= objectBottom) {
+        intersectTop = targetTop;
+        intersectHeight = obj.getHeight() - (intersectTop - objectTop);
+
+      } else if(objectTop >= targetTop && objectTop <= targetBottom) {
+        intersectTop = objectTop;
+        intersectHeight = options.target.getHeight() - (intersectTop - targetTop);
+      }
+
+      // Find intersect size (this will be 0 if objects are touching but not overlapping)
+      if(intersectWidth > 0 && intersectHeight > 0) {
+        intersectSize = intersectWidth * intersectHeight;
+      }
+
+      // Set outer snapping area
+      if(obj.getLeft() < outerAreaLeft || outerAreaLeft == null) {
+        outerAreaLeft = obj.getLeft();
+      }
+
+      if(obj.getTop() < outerAreaTop || outerAreaTop == null) {
+        outerAreaTop = obj.getTop();
+      }
+
+      if((obj.getLeft() + obj.getWidth()) > outerAreaRight || outerAreaRight == null) {
+        outerAreaRight = obj.getLeft() + obj.getWidth();
+      }
+
+      if((obj.getTop() + obj.getHeight()) > outerAreaBottom || outerAreaBottom == null) {
+        outerAreaBottom = obj.getTop() + obj.getHeight();
+      }
+
+      // If objects are intersecting, reposition outside all shapes which touch
+      if(intersectSize) {
+        var distX = (outerAreaRight / 2) - ((options.target.getLeft() + options.target.getWidth()) / 2);
+        var distY = (outerAreaBottom / 2) - ((options.target.getTop() + options.target.getHeight()) / 2);
+
+        // Set new position
+        findNewPos(distX, distY, options.target, obj);
+      }
+    }
+  });
+});
+
+
+
+
+
+//connect element end
+
+
+
 function watchCanvas($scope) {
 
   function updateScope() {
@@ -1811,6 +2433,11 @@ function watchCanvas($scope) {
     .on('path:created', updateScope)
     .on('selection:cleared', updateScope);
 }
+
+
+
+
+
 
 kitchensink.controller('CanvasControls', function($scope) {
 
